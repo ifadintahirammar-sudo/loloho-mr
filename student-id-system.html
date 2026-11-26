@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JJU Student ID System</title>
+
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+body {
+  font-family: Arial;
+  background: #edf3f9;
+  margin: 0;
+  padding: 20px;
+}
+.container {
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 22px;
+  border-radius: 12px;
+}
+h2 {color: #0756a5; text-align:center}
+.card {
+  border: 2px solid #0756a5;
+  border-radius: 12px;
+  padding: 18px;
+  text-align: center;
+}
+.info {
+  text-align: left;
+  line-height: 2;
+}
+input {
+  width: 95%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+}
+button {
+  background: #0756a5;
+  color: white;
+  border: 0;
+  padding: 12px;
+  margin: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+#reader {margin-top:20px}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h2>JIGJIGA UNIVERSITY</h2>
+<h3 style="text-align:center">STUDENT ID MANAGEMENT SYSTEM</h3>
+
+<div class="card">
+  <h3>STUDENT ID CARD</h3>
+  <h2>IFADIN TAHIR MUME</h2>
+  <div class="info">
+    <p><b>Student ID:</b> 0924/17</p>
+    <p><b>University:</b> Jigjiga University</p>
+    <p><b>Institution:</b> Technology</p>
+    <p><b>Department:</b> Information Technology</p>
+    <p><b>Academic Year:</b> To be updated</p>
+  </div>
+  <svg id="barcode"></svg>
+</div>
+
+<hr>
+
+<h3>SEARCH STUDENT</h3>
+<input id="studentId" placeholder="Enter Student ID">
+<button onclick="searchStudent()">Search</button>
+
+<div id="result"></div>
+
+<hr>
+
+<h3>BARCODE SCANNER</h3>
+<div id="reader"></div>
+<button onclick="startScanner()">Start Camera</button>
+<button onclick="stopScanner()">Stop Camera</button>
+
+</div>
+
+<script>
+const students = {
+  "0924/17": {
+    name: "IFADIN TAHIR MUME",
+    university: "Jigjiga University",
+    institution: "Technology",
+    department: "Information Technology",
+    academicYear: "To be updated"
+  }
+};
+
+JsBarcode("#barcode", "0924/17", {
+  format: "CODE128",
+  width: 2,
+  height: 60,
+  displayValue: true
+});
+
+function searchStudent() {
+  const id = document.getElementById("studentId").value.trim();
+  const student = students[id];
+  const result = document.getElementById("result");
+  result.replaceChildren();
+
+  if (!student) {
+    const message = document.createElement("p");
+    message.textContent = "Student not found!";
+    result.appendChild(message);
+    return;
+  }
+
+  const heading = document.createElement("h3");
+  heading.textContent = "Student Information";
+  result.appendChild(heading);
+
+  [
+    ["Name", student.name],
+    ["Student ID", id],
+    ["University", student.university],
+    ["Institution", student.institution],
+    ["Department", student.department],
+    ["Academic Year", student.academicYear]
+  ].forEach(function (item) {
+    const line = document.createElement("p");
+    line.textContent = item[0] + ": " + item[1];
+    result.appendChild(line);
+  });
+}
+
+let scanner = new Html5Qrcode("reader");
+
+function startScanner() {
+  scanner.start(
+    {facingMode: "environment"},
+    {
+      fps: 10,
+      qrbox: {width: 250, height: 120},
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.QR_CODE
+      ]
+    },
+    (decodedText) => {
+      document.getElementById("studentId").value = decodedText;
+      searchStudent();
+      stopScanner();
+    }
+  ).catch(error => alert("Camera error: " + error));
+}
+
+function stopScanner() {
+  if (scanner.isScanning) {
+    scanner.stop();
+  }
+}
+</script>
+</body>
+</html>
